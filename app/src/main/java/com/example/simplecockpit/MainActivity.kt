@@ -4,44 +4,33 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.simplecockpit.data.FakeDashboardRepository
+import com.example.simplecockpit.ui.dashboard.DashboardScreen
+import com.example.simplecockpit.ui.dashboard.DashboardViewModel
 import com.example.simplecockpit.ui.theme.SimpleCockpitTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val viewModel = ViewModelProvider(
+            this,
+            DashboardViewModel.Factory(FakeDashboardRepository())
+        )[DashboardViewModel::class.java]
+
         setContent {
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
             SimpleCockpitTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                DashboardScreen(
+                    uiState = uiState,
+                    onTogglePlayback = viewModel::togglePlayback
+                )
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SimpleCockpitTheme {
-        Greeting("Android")
     }
 }
