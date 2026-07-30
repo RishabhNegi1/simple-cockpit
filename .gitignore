@@ -13,8 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
-/.idea/*
-!/.idea/.gitignore
-!/.idea/misc.xml
+/.idea/
 hs_err_pid*.log
 replay_pid*.log
