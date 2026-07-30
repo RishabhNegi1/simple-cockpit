@@ -45,8 +45,8 @@ class NavigationState(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     destination: str
-    remainingMinutes: int
-    distanceKm: float
+    remainingMinutes: int = Field(ge=0)
+    distanceKm: float = Field(ge=0)
 
 
 class DashboardState(BaseModel):

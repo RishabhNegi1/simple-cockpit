@@ -1,96 +1,79 @@
-\# Simple Cockpit API Contract
+# Simple Cockpit API Contract
 
+The backend exposes JSON over HTTP. During local development it runs at `http://localhost:8000`.
 
+## Health check
 
-\## Endpoints
+### `GET /health`
 
+Returns `200 OK` while the service is available.
 
-
-POST /api/v1/dashboard/sync
-
-GET /health
-
-
-
-\## Request
-
-
-
+```json
 {
-
-&#x20; "clientTimestamp": "2026-07-30T17:30:00Z",
-
-&#x20; "action": "NONE"
-
+  "status": "ok"
 }
+```
 
+## Dashboard synchronization
 
+### `POST /api/v1/dashboard/sync`
 
-Allowed actions:
+The Android client sends its timestamp and an optional playback action. The backend logs the validated request, advances the in-memory simulation, and returns the complete dashboard state.
 
+### Request
 
-
-\- NONE
-
-\- TOGGLE\_PLAYBACK
-
-
-
-\## Response
-
-
-
+```json
 {
-
-&#x20; "serverTimestamp": "2026-07-30T17:30:00Z",
-
-&#x20; "speedKmh": 82.0,
-
-&#x20; "batteryPercent": 74,
-
-&#x20; "outsideTemperatureC": 21.5,
-
-&#x20; "drivingStatus": "DRIVING",
-
-&#x20; "media": {
-
-&#x20;   "isPlaying": true,
-
-&#x20;   "trackName": "Night Drive",
-
-&#x20;   "progressPercent": 46
-
-&#x20; },
-
-&#x20; "navigation": {
-
-&#x20;   "destination": "Central Station",
-
-&#x20;   "remainingMinutes": 18,
-
-&#x20;   "distanceKm": 12.4
-
-&#x20; }
-
+  "clientTimestamp": "2026-07-30T17:30:00Z",
+  "action": "NONE"
 }
+```
 
+| Field | Type | Constraints |
+| --- | --- | --- |
+| `clientTimestamp` | ISO-8601 timestamp | Required |
+| `action` | String enum | `NONE` or `TOGGLE_PLAYBACK` |
 
+Unknown request fields are rejected.
 
-\## Constraints
+### Successful response
 
+Returns `200 OK` with the current simulated state.
 
+```json
+{
+  "serverTimestamp": "2026-07-30T17:30:00Z",
+  "speedKmh": 82.0,
+  "batteryPercent": 74,
+  "outsideTemperatureC": 21.5,
+  "drivingStatus": "DRIVING",
+  "media": {
+    "isPlaying": true,
+    "trackName": "Night Drive",
+    "progressPercent": 46
+  },
+  "navigation": {
+    "destination": "Central Station",
+    "remainingMinutes": 18,
+    "distanceKm": 12.4
+  }
+}
+```
 
-\- action: NONE or TOGGLE\_PLAYBACK
+| Field | Constraints |
+| --- | --- |
+| `speedKmh` | `0` to `250` |
+| `batteryPercent` | `0` to `100` |
+| `outsideTemperatureC` | `-20` to `50` |
+| `drivingStatus` | `PARKED`, `DRIVING`, or `CHARGING` |
+| `media.progressPercent` | `0` to `100` |
+| `navigation.remainingMinutes` | Non-negative |
+| `navigation.distanceKm` | Non-negative |
 
-\- speedKmh: 0 to 250
+### Validation errors
 
-\- batteryPercent: 0 to 100
+FastAPI returns `422 Unprocessable Entity` when the timestamp, action, field type, or field constraints are invalid.
 
-\- outsideTemperatureC: -20 to +50
+## Logging
 
-\- drivingStatus: PARKED, DRIVING, or CHARGING
-
-\- progressPercent: 0 to 100
-
-\- timestamps: ISO-8601
-
+Every validated synchronization request is appended to `sync_requests.log`. Each line contains a UTC timestamp and the validated request JSON. Requests rejected during validation are not written by this logger.
