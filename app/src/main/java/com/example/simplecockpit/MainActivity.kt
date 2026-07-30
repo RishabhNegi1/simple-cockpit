@@ -7,7 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.simplecockpit.data.FakeDashboardRepository
+import com.example.simplecockpit.data.remote.NetworkProvider
+import com.example.simplecockpit.data.remote.RemoteDashboardRepository
 import com.example.simplecockpit.ui.dashboard.DashboardScreen
 import com.example.simplecockpit.ui.dashboard.DashboardViewModel
 import com.example.simplecockpit.ui.theme.SimpleCockpitTheme
@@ -19,7 +20,9 @@ class MainActivity : ComponentActivity() {
 
         val viewModel = ViewModelProvider(
             this,
-            DashboardViewModel.Factory(FakeDashboardRepository())
+            DashboardViewModel.Factory(
+                RemoteDashboardRepository(NetworkProvider.dashboardApi)
+            )
         )[DashboardViewModel::class.java]
 
         setContent {
