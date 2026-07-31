@@ -22,7 +22,7 @@ class DashboardViewModel(
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
-    // Serialize requests so polling and a driver interaction cannot race each other.
+    // Don't let polling and button taps send requests at the same time.
     private val synchronizationMutex = Mutex()
 
     init {
@@ -53,7 +53,7 @@ class DashboardViewModel(
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
 
-                // Keep the last successful data visible during a transient connection failure.
+                // Leave the old values on screen if a refresh fails.
                 _uiState.update { currentState ->
                     currentState.copy(
                         isInitialLoading = false,

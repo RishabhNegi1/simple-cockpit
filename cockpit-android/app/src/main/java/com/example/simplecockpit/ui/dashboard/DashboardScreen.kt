@@ -125,7 +125,7 @@ fun DrivingDataPanel(
         ) {
             StatusLabel(status = dashboard.drivingStatus)
 
-            // Speed gets the strongest visual priority because it must be readable at a glance.
+            // Keep the speed big so it is easy to read quickly.
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
